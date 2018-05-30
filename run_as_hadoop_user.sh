@@ -13,8 +13,8 @@ readonly HOST_IP=`hostname -I | xargs`
 cd ~
 
 echo 从FTP上下载OracleJDK
-#curl -O -C - ftp://202.120.222.71/Download_%D7%F7%D2%B5%CF%C2%D4%D8%C7%F8/hadoop/jdk-8u171-linux-x64.tar.gz -u stu-lirui:stu-lirui
-curl -O -C - http://192.168.0.100:8088/Y%3A/hadoop/jdk-8u171-linux-x64.tar.gz
+curl -O -C - ftp://202.120.222.71/Download_%D7%F7%D2%B5%CF%C2%D4%D8%C7%F8/hadoop/jdk-8u171-linux-x64.tar.gz -u stu-lirui:stu-lirui
+#curl -O -C - http://192.168.0.100:8088/Y%3A/hadoop/jdk-8u171-linux-x64.tar.gz
 mkdir ${JDK_FOLDER_NAME}
 
 echo
@@ -23,8 +23,8 @@ tar xf jdk-8u171-linux-x64.tar.gz -C ${JDK_FOLDER_NAME}
 
 echo
 echo 从FTP上下载Hadoop
-#curl -O -C - ftp://202.120.222.71/Download_%D7%F7%D2%B5%CF%C2%D4%D8%C7%F8/hadoop/hadoop-2.6.0-cdh5.9.3.tar.gz -u stu-lirui:stu-lirui
-curl -O -C - http://192.168.0.100:8088/Y%3A/hadoop/hadoop-2.6.0-cdh5.9.3.tar.gz
+curl -O -C - ftp://202.120.222.71/Download_%D7%F7%D2%B5%CF%C2%D4%D8%C7%F8/hadoop/hadoop-2.6.0-cdh5.9.3.tar.gz -u stu-lirui:stu-lirui
+#curl -O -C - http://192.168.0.100:8088/Y%3A/hadoop/hadoop-2.6.0-cdh5.9.3.tar.gz
 mkdir ${HADOOP_FOLDER_NAME}
 
 echo
@@ -51,7 +51,7 @@ echo
 echo 生成SSH密钥
 ssh-keygen -f ~/.ssh/hadoop
 cat ~/.ssh/hadoop.pub >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/hadoop
+chmod 644 ~/.ssh/authorized_keys
 
 echo 启动ssh-agent
 ssh-agent
@@ -67,7 +67,7 @@ mkdir -p ${HADOOP_FILES}/dfs/name
 mkdir -p ${HADOOP_FILES}/dfs/data
 
 HADOOP_HOME=$HOME/${HADOOP_FOLDER_NAME}/hadoop-2.6.0-cdh5.9.3
-cp *.xml ${HADOOP_HOME}/etc/hadoop
+cp git_tmp/*.xml ${HADOOP_HOME}/etc/hadoop
 
 echo
 echo 执行 NameNode 的格式化
@@ -75,6 +75,7 @@ hdfs namenode -format
 
 echo
 echo 开启 NaneNode 和 DataNode 守护进程
+echo 注意确认添加SSH key
 start-dfs.sh
 
 echo

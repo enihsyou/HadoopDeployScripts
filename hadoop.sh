@@ -14,6 +14,7 @@ echo 开启 50070 端口
 sudo firewall-cmd --permanent --zone=public --add-port=8080/tcp
 sudo firewall-cmd --reload
 
+echo 复制临时文件
 GIT_TMP=/home/hadoop/git_tmp
 
 sudo mkdir ${GIT_TMP}
@@ -23,7 +24,8 @@ sudo cp *.xml ${GIT_TMP}
 sudo chmod -R 777 ${GIT_TMP}
 
 sudo -iu hadoop << 'EOF'
-    ./run_as_hadoop_user.sh
+    git_tmp/run_as_hadoop_user.sh
 EOF
 
+echo 清理临时文件 ... OK
 sudo rm -rf ${GIT_TMP}
