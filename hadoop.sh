@@ -12,6 +12,7 @@ echo 开启 8088 端口
 sudo firewall-cmd --permanent --zone=public --add-port=50070/tcp
 echo 开启 50070 端口
 sudo firewall-cmd --permanent --zone=public --add-port=8080/tcp
+echo 重载防火墙配置
 sudo firewall-cmd --reload
 
 echo 复制临时文件

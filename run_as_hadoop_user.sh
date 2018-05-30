@@ -5,9 +5,9 @@ if [ "$(whoami)" != "hadoop" ]; then
 fi
 
 export LANG=zh_CN.UTF-8
-readonly JDK_FOLDER_NAME=jdk
+readonly JDK_FOLDER_NAME=jdk # JDK根路径
 readonly HADOOP_FOLDER_NAME=hadoop
-readonly HADOOP_FILES_NAME=hadoop_files
+readonly HADOOP_FILES_FOLDER_NAME=hadoop_files
 readonly HOST_IP=`hostname -I | xargs`
 
 cd ~
@@ -60,7 +60,7 @@ eval $(ssh-agent -s)
 echo 添加密钥
 ssh-add ~/.ssh/hadoop
 
-HADOOP_FILES=$HOME/${HADOOP_FOLDER_NAME}/${HADOOP_FILES_NAME}
+HADOOP_FILES=$HOME/${HADOOP_FILES_FOLDER_NAME}
 echo 生成目标路径 ${HADOOP_FILES}
 mkdir -p ${HADOOP_FILES}
 mkdir -p ${HADOOP_FILES}/dfs/name
