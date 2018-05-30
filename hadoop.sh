@@ -4,7 +4,7 @@ export LANG=zh_CN.UTF-8
 
 echo 一些操作需要ROOT权限
 
-echo 添加hadoop用户
+echo 添加 hadoop 用户
 sudo adduser hadoop
 
 echo 添加防火墙规则
@@ -24,9 +24,10 @@ sudo cp run_as_hadoop_user.sh ${GIT_TMP}
 sudo cp *.xml ${GIT_TMP}
 sudo chmod -R 777 ${GIT_TMP}
 
+# 切换到hadoop用户下继续操作
 sudo -iu hadoop << 'EOF'
     git_tmp/run_as_hadoop_user.sh
 EOF
 
-echo 清理临时文件 ... OK
 sudo rm -rf ${GIT_TMP}
+echo 清理临时文件 ... OK

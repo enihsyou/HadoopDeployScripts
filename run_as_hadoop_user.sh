@@ -5,10 +5,16 @@ if [ "$(whoami)" != "hadoop" ]; then
 fi
 
 export LANG=zh_CN.UTF-8
-readonly JDK_FOLDER_NAME=jdk # JDK根路径
-readonly HADOOP_FOLDER_NAME=hadoop
-readonly HADOOP_FILES_FOLDER_NAME=hadoop_files
-readonly HOST_IP=`hostname -I | xargs`
+
+readonly JDK_FOLDER_NAME=jdk # JDK文件的存放目录名
+readonly HADOOP_FOLDER_NAME=hadoop # hadoop文件的存放目录名
+readonly HADOOP_FILES_FOLDER_NAME=hadoop_files # hadoop运行时的文件存放目录名
+readonly HOST_IP=`hostname -I | xargs` # 本机IP
+
+# hadoop 文件的根目录
+HADOOP_HOME=$HOME/${HADOOP_FOLDER_NAME}/hadoop-2.6.0-cdh5.9.3
+# hadoop 运行时文件根目录
+HADOOP_FILES=$HOME/${HADOOP_FILES_FOLDER_NAME}
 
 cd ~
 
@@ -17,17 +23,14 @@ curl -O -C - ftp://202.120.222.71/Download_%D7%F7%D2%B5%CF%C2%D4%D8%C7%F8/hadoop
 #curl -O -C - http://192.168.0.100:8088/Y%3A/hadoop/jdk-8u171-linux-x64.tar.gz
 mkdir ${JDK_FOLDER_NAME}
 
-echo
 echo 解压OracleJDK
 tar xf jdk-8u171-linux-x64.tar.gz -C ${JDK_FOLDER_NAME}
 
-echo
 echo 从FTP上下载Hadoop
 curl -O -C - ftp://202.120.222.71/Download_%D7%F7%D2%B5%CF%C2%D4%D8%C7%F8/hadoop/hadoop-2.6.0-cdh5.9.3.tar.gz -u stu-lirui:stu-lirui
 #curl -O -C - http://192.168.0.100:8088/Y%3A/hadoop/hadoop-2.6.0-cdh5.9.3.tar.gz
 mkdir ${HADOOP_FOLDER_NAME}
 
-echo
 echo 解压Hadoop
 tar xf hadoop-2.6.0-cdh5.9.3.tar.gz -C ${HADOOP_FOLDER_NAME}
 
@@ -54,19 +57,17 @@ cat ~/.ssh/hadoop.pub >> ~/.ssh/authorized_keys
 chmod 644 ~/.ssh/authorized_keys
 
 echo 启动ssh-agent
-ssh-agent
+ssh-agent  # may be a useless statement
 eval $(ssh-agent -s)
 
 echo 添加密钥
 ssh-add ~/.ssh/hadoop
 
-HADOOP_FILES=$HOME/${HADOOP_FILES_FOLDER_NAME}
-echo 生成目标路径 ${HADOOP_FILES}
-mkdir -p ${HADOOP_FILES}
+echo 生成目标路径 ${HADOOP_FILES} 及子目录
 mkdir -p ${HADOOP_FILES}/dfs/name
 mkdir -p ${HADOOP_FILES}/dfs/data
 
-HADOOP_HOME=$HOME/${HADOOP_FOLDER_NAME}/hadoop-2.6.0-cdh5.9.3
+echo 复制hadoop配置文件
 cp git_tmp/*.xml ${HADOOP_HOME}/etc/hadoop
 
 echo

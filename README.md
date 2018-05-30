@@ -1,4 +1,4 @@
-# Centos 下的 Hadoop 安装脚本
+# CentOS 下的 Hadoop 安装脚本
 
 ## 参考
 
@@ -21,7 +21,8 @@
 
 
 ## 运行方式
-```shell
+
+```bash
 git clone https://github.com/enihsyou/HadoopDeployScripts.git
 cd HadoopDeployScripts
 chmod +x hadoop.sh
