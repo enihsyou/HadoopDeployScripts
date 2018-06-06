@@ -32,12 +32,14 @@ chmod +x hadoop.sh
 
 ## 说明
 
-- 脚本会创建一个叫 **hadoop** 的普通账户，它拥有自己的用户目录。
+- hosts.txt文件里的hosts记录会被追加到/etc/hosts里；未修改hostname。
 - jdk和hadoop文件在这个账户目录下，系统变量使用用户配置文件的设置，不会和系统配置冲突。
-- 未修改hostname和hosts
+- 自定义hadoop配置文件在项目的 `/etc` 目录下
 - 脚本使用了 `hostname -I` 获取本机IP地址
-- 会为hadoop账户生成一个 *~/.ssh/hadoop* 的RSA非对称密钥，会启动 *ssh-agent* 并添加密钥，以便于自动登陆
+- 会为当前账户生成一个 *~/.ssh/id_rsa* 的RSA非对称密钥，注意冲突。
 - 使用 `LANG=zh_CN.UTF-8` 设置为中文显示，有些Terminal可能不支持显示
-- 在 `/home/hadoop/hadoop_files` 下放置HDFS文件，可通过修改xml文件自定义
+- 在 `~/hadoop_files` 下放置HDFS文件，可通过修改xml文件自定义
 - jdk和hadoop文件是直接从ftp上下载的
 
+### 注意
+- `/etc/hadoop/core-site.xml` 里面的路径需要修改为自己的用户目录
