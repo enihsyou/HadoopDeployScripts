@@ -12,11 +12,14 @@ fi
 echo 一些操作需要ROOT权限
 
 echo 添加防火墙规则
-echo 开启 8088 端口 用于查看任务进度
+echo 开启 8088 端口 用于查看 ResourceManager
 sudo firewall-cmd --permanent --zone=public --add-port=8088/tcp
 
 echo 开启 50070 端口 用于查看 DataNode 和 NameNode 的状态
 sudo firewall-cmd --permanent --zone=public --add-port=50070/tcp
+
+echo 开启 19888 端口 用于查看 MapReduce JobHistory Server
+sudo firewall-cmd --permanent --zone=public --add-port=19888/tcp
 
 echo 开启 9000 - 9100 端口
 sudo firewall-cmd --permanent --zone=public --add-port=9000-9100/tcp
@@ -38,9 +41,24 @@ HADOOP_FILES=~/${HADOOP_FILES_FOLDER_NAME}
 
 cd $HOME
 
+echo 从哪个源下载? FTP or Local
+echo "Local is for debug"
+download_url=""
+additional_url_parm=""
+select yn in "FTP" "Local"; do
+    case $yn in
+        FTP )
+         download_url=ftp://202.120.222.71/Download_%D7%F7%D2%B5%CF%C2%D4%D8%C7%F8/hadoop/
+         additional_url_parm="-u stu-lirui:stu-lirui"
+         break;;
+        Local )
+         download_url=http://192.168.0.100:8088/Y%3A/hadoop
+        break;;
+    esac
+done
+
 echo 从FTP上下载OracleJDK
-#curl -O -C - ftp://202.120.222.71/Download_%D7%F7%D2%B5%CF%C2%D4%D8%C7%F8/hadoop/jdk-8u171-linux-x64.tar.gz -u stu-lirui:stu-lirui
-curl -O -C - http://192.168.0.100:8088/Y%3A/hadoop/jdk-8u171-linux-x64.tar.gz
+curl -O -C - ${download_url}/jdk-8u171-linux-x64.tar.gz ${additional_url_parm}
 mkdir -p ${JDK_FOLDER_NAME}
 
 echo 解压OracleJDK
@@ -49,8 +67,7 @@ if [ ! -d ${JDK_FOLDER_NAME}/jdk1.8.0_171 ]; then
 fi
 
 echo 从FTP上下载Hadoop
-#curl -O -C - ftp://202.120.222.71/Download_%D7%F7%D2%B5%CF%C2%D4%D8%C7%F8/hadoop/hadoop-2.6.0-cdh5.9.3.tar.gz -u stu-lirui:stu-lirui
-curl -O -C - http://192.168.0.100:8088/Y%3A/hadoop/hadoop-2.6.0-cdh5.9.3.tar.gz
+curl -O -C - ${download_url}/hadoop-2.6.0-cdh5.9.3.tar.gz ${additional_url_parm}
 mkdir -p ${HADOOP_FOLDER_NAME}
 
 echo 解压Hadoop
@@ -143,10 +160,12 @@ echo
 echo 运行jps验证
 jps
 
-echo
-echo 可以访问 Web 界面 http://${HOST_IP}:50070 查看 NameNode 和 Datanode 信息
-echo 可以通过 Web 界面 http://${HOST_IP}:8088 查看Nodes of the cluster
-echo 可以通过 Web 界面 http://${HOST_IP}:9003 查看JobHistory
-echo 设置系统中文请设置系统变量 LANG=zh_CN.UTF-8
-echo 如果有问题找不到命令 执行: source $HOME/.bashrc
-echo 关闭请使用 stop_hadoop.sh
+echo "WebUI:
+NameNode                    http://${HOST_IP}:50070
+ResourceManager             http://${HOST_IP}:8088
+MapReduce JobHistory Server http://${HOST_IP}:19888
+
+设置系统中文请设置系统变量 LANG=zh_CN.UTF-8
+如果有问题找不到命令 执行: source $HOME/.bashrc
+关闭请使用 stop_hadoop.sh
+"

@@ -26,12 +26,4 @@
     <name>mapred.job.tracker</name>
     <value>master:9001</value>
   </property>
-  <property>
-    <name>mapreduce.jobhistory.address</name>
-    <value>master:9002</value>
-  </property>
-  <property>
-    <name>mapreduce.jobhistory.webapp.address</name>
-    <value>master:9003</value>
-  </property>
 </configuration>
