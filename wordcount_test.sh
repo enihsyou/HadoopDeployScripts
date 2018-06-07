@@ -15,7 +15,7 @@ select yn in "Small" "Medium" "Large"; do
         # https://www.gutenberg.org/ebooks/
         Medium ) input_directory=wordcount_input/medium/*.txt break;;
 
-        # http://u.cs.biu.ac.il/~koppel/BlogCorpus.htm
+        # https://norvig.com/big.txt
         Large ) input_directory=wordcount_input/large/*.txt break;;
     esac
 done
