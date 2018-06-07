@@ -11,21 +11,33 @@ fi
 
 echo 一些操作需要ROOT权限
 
+echo 关闭防火墙 or 添加过滤规则
+select yn in "Stop" "Rule"; do
+    case $yn in
+        Stop )
+sudo systemctl stop firewalld
+            break;;
+        Rule )
 echo 添加防火墙规则
 echo 开启 8088 端口 用于查看 ResourceManager
 sudo firewall-cmd --permanent --zone=public --add-port=8088/tcp
 
-echo 开启 50070 端口 用于查看 DataNode 和 NameNode 的状态
-sudo firewall-cmd --permanent --zone=public --add-port=50070/tcp
+echo 开启 50000 50100 端口 用于查看 DataNode 和 NameNode 的状态
+sudo firewall-cmd --permanent --zone=public --add-port=50000-50100/tcp
 
 echo 开启 19888 端口 用于查看 MapReduce JobHistory Server
 sudo firewall-cmd --permanent --zone=public --add-port=19888/tcp
 
-echo 开启 9000 - 9100 端口
-sudo firewall-cmd --permanent --zone=public --add-port=9000-9100/tcp
+echo 开启 8000 - 10000 端口
+sudo firewall-cmd --permanent --zone=public --add-port=8000-10000/tcp
 
 echo 重载防火墙配置
 sudo firewall-cmd --reload
+        break;;
+    esac
+done
+
+
 
 readonly SCRIPT_HOME=$PWD
 readonly JDK_FOLDER_NAME=jdk # JDK文件的存放目录名
@@ -78,17 +90,20 @@ fi
 echo
 echo 配置系统变量
 if ! `command -v java &> /dev/null`; then
-echo "export JAVA_HOME=\$HOME/$JDK_FOLDER_NAME/jdk1.8.0_171" >> ~/.bashrc
-echo "export JRE_HOME=\$JAVA_HOME/jre" >> ~/.bashrc
-echo "export CLASSPATH=.:\$JAVA_HOME/lib:\$JRE_HOME/lib:\$CLASSPATH" >> ~/.bashrc
-echo "export HADOOP_HOME=\$HOME/$HADOOP_FOLDER_NAME/hadoop-2.6.0-cdh5.9.3" >> ~/.bashrc
-echo "export HADOOP_INSTALL=\$HADOOP_HOME" >> ~/.bashrc
-echo "export HADOOP_MAPRED_HOME=\$HADOOP_HOME" >> ~/.bashrc
-echo "export HADOOP_COMMON_HOME=\$HADOOP_HOME" >> ~/.bashrc
-echo "export HADOOP_HDFS_HOME=\$HADOOP_HOME" >> ~/.bashrc
-echo "export YARN_HOME=\$HADOOP_HOME" >> ~/.bashrc
-echo "export HADOOP_COMMON_LIB_NATIVE_DIR=\$HADOOP_HOME/lib/native" >> ~/.bashrc
-echo "export PATH=\$JAVA_HOME/bin:\$JRE_HOME/bin:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin:\$PATH" >> ~/.bashrc
+echo "
+export JAVA_HOME=\$HOME/$JDK_FOLDER_NAME/jdk1.8.0_171
+export JRE_HOME=\$JAVA_HOME/jre
+export CLASSPATH=.:\$JAVA_HOME/lib:\$JRE_HOME/lib:\$CLASSPATH
+export HADOOP_HOME=\$HOME/$HADOOP_FOLDER_NAME/hadoop-2.6.0-cdh5.9.3
+export HADOOP_CLASSPATH=\$JAVA_HOME/lib/tools.jar
+export HADOOP_INSTALL=\$HADOOP_HOME
+export HADOOP_MAPRED_HOME=\$HADOOP_HOME
+export HADOOP_COMMON_HOME=\$HADOOP_HOME
+export HADOOP_HDFS_HOME=\$HADOOP_HOME
+export YARN_HOME=\$HADOOP_HOME
+export HADOOP_COMMON_LIB_NATIVE_DIR=\$HADOOP_HOME/lib/native
+export PATH=\$JAVA_HOME/bin:\$JRE_HOME/bin:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin:\$PATH
+" >> ~/.bashrc
 fi
 source $HOME/.bashrc
 
@@ -101,7 +116,6 @@ echo
 echo 追加Hosts
 cat ${SCRIPT_HOME}/${HOSTS_FILENAME}
 sudo -- sh -c "cat ${SCRIPT_HOME}/${HOSTS_FILENAME} >> /etc/hosts"
-hostname ${HOST_IP}
 
 echo
 echo 生成SSH密钥
@@ -113,8 +127,14 @@ while read line; do
   string_array=(${line})
   _host_ip=${string_array[0]}
   _hostname=${string_array[1]}
+
   echo 添加到: ${_hostname} - ${_host_ip}
   ssh-copy-id ${_hostname}
+
+  if [ ${_host_ip} == ${HOST_IP} ]; then
+    echo 设置hostname: ${_hostname}
+    sudo hostname ${_hostname}
+  fi
 done < ${SCRIPT_HOME}/${HOSTS_FILENAME}
 echo 如果有其他实例 请手动添加
 
@@ -135,7 +155,13 @@ echo =====================
 select yn in "Yes" "No"; do
     case $yn in
         Yes ) break;;
-        No ) exit;;
+        No )
+        echo "
+设置系统中文请设置系统变量 LANG=zh_CN.UTF-8
+如果有问题找不到命令 执行: source ~/.bashrc
+关闭请使用 stop_hadoop.sh
+"
+        exit;;
     esac
 done
 

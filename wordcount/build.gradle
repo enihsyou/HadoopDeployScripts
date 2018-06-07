@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+dependencies {
+    compileOnly group: 'org.apache.hadoop', name: 'hadoop-common', version: '2.6.0'
+    compileOnly group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: '2.6.0'
+}
+
+jar {
+    destinationDir = file('.')
+}

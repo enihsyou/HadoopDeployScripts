@@ -29,12 +29,9 @@
     <name>dfs.datanode.data.dir</name>
     <value>file:/home/enihsyou/hadoop_files/hdfs/data</value>
   </property>
-  <!--<property>-->
-    <!--<name>dfs.namenode.http-address</name>-->
-    <!--<value>slave1:50070</value>-->
-  <!--</property>-->
-  <!--<property>-->
-    <!--<name>dfs.namenode.secondary.http-address</name>-->
-    <!--<value>slave2:50070</value>-->
-  <!--</property>-->
+  <property>
+    <name>dfs.namenode.secondary.http-address</name>
+    <value>slave1:50090</value>
+    <description>SecondaryNameNodeHostname</description>
+  </property>
 </configuration>
