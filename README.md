@@ -33,7 +33,7 @@ chmod +x wordcount.sh
 ./wordcount.sh
 ```
 
-wordcount 统计性别的输入文件路径: `data/*.txt`
+wordcount 统计性别的输入文件路径: `input/data/*.txt`
 注意使用Local编译。
 
 ## 说明

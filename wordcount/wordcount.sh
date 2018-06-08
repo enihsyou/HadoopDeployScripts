@@ -19,6 +19,7 @@ select size in "Small" "Medium" "Large" "Manuel"; do
         Large ) input_directory=input/large/*.txt break;;
 
         Manuel ) read -p "输入路径: " input_directory
+        echo ${input_directory}
         break;;
     esac
 done
