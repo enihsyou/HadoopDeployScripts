@@ -19,9 +19,41 @@ import java.util.*;
 
 public class WordCount {
 
-    public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable> {
+    private final static List<String> GENDERS = Arrays.asList("Female", "Male");
 
-        enum CountersEnum {INPUT_WORDS}
+    public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        GenericOptionsParser optionParser = new GenericOptionsParser(conf, args);
+        String[] remainingArgs = optionParser.getRemainingArgs();
+        if ((remainingArgs.length != 2) && (remainingArgs.length != 4)) {
+            System.err.println("Usage: wordcount <in> <out> [-skip skipPatternFile]");
+            System.exit(2);
+        }
+
+        Job job = Job.getInstance(conf, "word count");
+        job.setJarByClass(WordCount.class);
+        job.setMapperClass(TokenizerMapper.class);
+        job.setCombinerClass(IntSumReducer.class);
+        job.setReducerClass(IntSumReducer.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+
+        List<String> otherArgs = new ArrayList<>();
+        for (int i = 0; i < remainingArgs.length; ++i) {
+            if ("-skip" .equals(remainingArgs[i])) {
+                job.addCacheFile(new Path(remainingArgs[++i]).toUri());
+                job.getConfiguration().setBoolean("wordcount.skip.patterns", true);
+            } else {
+                otherArgs.add(remainingArgs[i]);
+            }
+        }
+        FileInputFormat.addInputPath(job, new Path(otherArgs.get(0)));
+        FileOutputFormat.setOutputPath(job, new Path(otherArgs.get(1)));
+
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+
+    public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable> {
 
         private final static IntWritable one = new IntWritable(1);
 
@@ -29,7 +61,7 @@ public class WordCount {
 
         private boolean caseSensitive;
 
-        private Set<String> patternsToSkip = new HashSet<String>();
+        private Set<String> patternsToSkip = new HashSet<>();
 
         private Configuration conf;
 
@@ -43,7 +75,7 @@ public class WordCount {
                 URI[] patternsURIs = Job.getInstance(conf).getCacheFiles();
                 for (URI patternsURI : patternsURIs) {
                     Path patternsPath = new Path(patternsURI.getPath());
-                    String patternsFileName = patternsPath.getName().toString();
+                    String patternsFileName = patternsPath.getName();
                     parseSkipFile(patternsFileName);
                 }
             }
@@ -52,31 +84,37 @@ public class WordCount {
         private void parseSkipFile(String fileName) {
             try {
                 fis = new BufferedReader(new FileReader(fileName));
-                String pattern = null;
+                String pattern;
                 while ((pattern = fis.readLine()) != null) {
                     patternsToSkip.add(pattern);
                 }
             } catch (IOException ioe) {
-                System.err.println("Caught exception while parsing the cached file '" + StringUtils.stringifyException(ioe));
+                System.err.println(
+                    "Caught exception while parsing the cached file '" + StringUtils.stringifyException(ioe));
             }
         }
 
         @Override
-        public void map(
-            Object key, Text value, Context context
-        ) throws IOException, InterruptedException {
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String line = (caseSensitive) ? value.toString() : value.toString().toLowerCase();
             for (String pattern : patternsToSkip) {
                 line = line.replaceAll(pattern, "");
             }
+
             StringTokenizer itr = new StringTokenizer(line);
             while (itr.hasMoreTokens()) {
-                word.set(itr.nextToken());
+                final String gender = itr.nextToken();
+                if (!GENDERS.contains(gender)) continue;
+
+                word.set(gender);
                 context.write(word, one);
+
                 Counter counter = context.getCounter(CountersEnum.class.getName(), CountersEnum.INPUT_WORDS.toString());
                 counter.increment(1);
             }
         }
+
+        enum CountersEnum {INPUT_WORDS}
     }
 
     public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
@@ -91,38 +129,8 @@ public class WordCount {
                 sum += val.get();
             }
             result.set(sum);
+
             context.write(key, result);
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        Configuration conf = new Configuration();
-        GenericOptionsParser optionParser = new GenericOptionsParser(conf, args);
-        String[] remainingArgs = optionParser.getRemainingArgs();
-        if ((remainingArgs.length != 2) && (remainingArgs.length != 4)) {
-            System.err.println("Usage: wordcount <in> <out> [-skip skipPatternFile]");
-            System.exit(2);
-        }
-        Job job = Job.getInstance(conf, "word count");
-        job.setJarByClass(WordCount.class);
-        job.setMapperClass(TokenizerMapper.class);
-        job.setCombinerClass(IntSumReducer.class);
-        job.setReducerClass(IntSumReducer.class);
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(IntWritable.class);
-
-        List<String> otherArgs = new ArrayList<String>();
-        for (int i = 0; i < remainingArgs.length; ++i) {
-            if ("-skip".equals(remainingArgs[i])) {
-                job.addCacheFile(new Path(remainingArgs[++i]).toUri());
-                job.getConfiguration().setBoolean("wordcount.skip.patterns", true);
-           } else {
-                otherArgs.add(remainingArgs[i]);
-            }
-        }
-        FileInputFormat.addInputPath(job, new Path(otherArgs.get(0)));
-        FileOutputFormat.setOutputPath(job, new Path(otherArgs.get(1)));
-
-        System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
 }
