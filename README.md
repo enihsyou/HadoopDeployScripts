@@ -27,16 +27,18 @@ chmod +x hadoop.sh
 运行wordcount测试
 ```bash
 cd wordcount
-chmod +x wordcount_test.sh
-./wordcount_test.sh
+chmod +x wordcount.sh
+./wordcount.sh
 ```
 
+wordcount 统计性别的输入文件路径: `data/*.txt`
+注意使用Local编译。
 
 ## 说明
 
-- hosts.txt文件里的hosts记录会被追加到/etc/hosts里；未修改hostname。
+- hosts.txt文件里的hosts记录会被追加到 `/etc/hosts` 里；未修改hostname。
 - jdk和hadoop文件在这个账户目录下，系统变量使用用户配置文件的设置，不会和系统配置冲突。
-- 自定义hadoop配置文件在项目的 `/etc` 目录下
+- 自定义hadoop配置文件在项目的 `etc` 目录下
 - 脚本使用了 `hostname -I` 获取本机IP地址
 - 会为当前账户生成一个 *~/.ssh/id_rsa* 的RSA非对称密钥，注意冲突。
 - 使用 `LANG=zh_CN.UTF-8` 设置为中文显示，有些Terminal可能不支持显示
@@ -46,7 +48,13 @@ chmod +x wordcount_test.sh
 
 - wordcount测试文件在 `wordcount/input` 下面，可自行替换
 ### 注意
-- `/etc/hadoop/core-site.xml` 里面的路径需要修改为自己的用户目录
+- `etc/hadoop/core-site.xml` 里面的路径需要修改为自己的用户目录
+- 如果想体验单机版
+
+  1. 把 `etc/masters` 里的其他清空，只留下本机（填写 `localhost` 或者 `master`）
+  2. 把 `etc/slaves` 里清空（因为不需要其他机器）
+  3. 把 `etc/hdfs-site.xml` 里的 *dfs.namenode.secondary.http-address* 记录删除掉，因为没有第二台机器放置namenode。
+
 
 
 

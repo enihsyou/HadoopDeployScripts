@@ -68,7 +68,7 @@ public class WordCount {
         private BufferedReader fis;
 
         @Override
-        public void setup(Context context) throws IOException, InterruptedException {
+        public void setup(Context context) throws IOException {
             conf = context.getConfiguration();
             caseSensitive = conf.getBoolean("wordcount.case.sensitive", true);
             if (conf.getBoolean("wordcount.skip.patterns", false)) {
